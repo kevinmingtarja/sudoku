@@ -13,6 +13,40 @@ The requirements states that Next.js, Tailwind CSS, and Supabase should be used.
 - Supabase:
   Another interesting tech that I haven't got the chance to try on. Interested to see what stuff they add on on top of a normal postgres.
 
+## Design
+
+### Functional Requirements
+
+- A working and playable Sudoku web-based game
+  - Persist the state between page close/refresh
+- Load Sudoku puzzles from hard-coded puzzles stored on db
+  - Allow users to pick from this list
+  - Only one game can be in progress at any given time, progress will be lost if user starts a new game
+
+### Non Functional Requirements
+
+-
+
+### Sudoku Data Structure
+
+In the db, a puzzle is stored as a string of length 81 (9x9). In the frontend, we need to transform this to a data structure that allows for:
+
+- Quick insertion of digits
+- Quick checking of validity
+- Differentiate cells that are prefilled vs editable
+- (Future work) Give hints/answers, and check correctness (not validity) of the current state
+
+Based on those requirements, I designed the data structure to be the following:
+
+- Array of length 81
+- Index corresponds to the cell number
+- To get cell position: ((i//9), (i%9))
+- Each element is an object of the following:
+  - value: int
+  - isEditable: bool
+
+To check validity, we need to check each time a new digit is entered. We will maintain three hash maps in memory (row, col, sub-grid), which is constructed at the beginning of every game. Then at every step, we just update those maps. These maps will be a 9x9 matrix.
+
 ## Dev Setup
 
 ### Frontend
@@ -20,6 +54,12 @@ The requirements states that Next.js, Tailwind CSS, and Supabase should be used.
 ```bash
 npm run dev
 ```
+
+## Inspirations
+
+- https://sudoku.com
+- https://www.websudoku.com/
+- https://www.nytimes.com/puzzles/sudoku
 
 ---
 
