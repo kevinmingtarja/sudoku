@@ -31,3 +31,18 @@ export const getSubgridIdx = (cell: number) => {
   const col = getColIdx(cell)
   return Math.floor(row / 3) * 3 + Math.floor(col / 3)
 }
+
+export const getCellIdx = (row: number, col: number) => {
+  return row * 9 + col
+}
+
+export const convertToMatrix = <T>(cells: T[]) => {
+  return cells.reduce<T[][]>((rows, cell, idx) => {
+    if (idx % 9 === 0) {
+      rows.push([cell])
+    } else {
+      rows[rows.length - 1].push(cell)
+    }
+    return rows
+  }, [])
+}
