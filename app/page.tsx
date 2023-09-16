@@ -1,11 +1,26 @@
 import supabase from "@/lib/supabase"
 
-export default async function Home() {
-  const { data: sudoku } = await supabase.from("sudoku_puzzles").select()
-  console.log(sudoku)
+import GameContainer from "./game"
+
+const Page = async () => {
+  const { data: puzzles } = await supabase
+    .from("sudoku_puzzles")
+    .select("id, puzzle")
+
+  if (!puzzles) {
+    return (
+      <main className="flex min-h-screen flex-col items-center justify-between p-24">
+        <h1>There are no sudoku puzzles</h1>
+      </main>
+    )
+  }
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      {JSON.stringify(sudoku, null, 2)}
+      <h1>Sudoku</h1>
+      <GameContainer puzzles={puzzles} />
     </main>
   )
 }
+
+export default Page
