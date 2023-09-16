@@ -46,12 +46,23 @@ const Game = ({ id, initialState }: { id: string; initialState: string }) => {
   }
 
   const handleAdd = (cellIdx: number, value: number) => {
-    if (checkValidity(cellIdx, value)) {
-      // change state of game, annotate the cells that are invalid
-    }
-    // change value of cellIdx in game
+    if (!isValid || cellIdx < 0 || cellIdx > 80 || value < 1 || value > 9)
+      return
+
     const newGame = [...game]
-    newGame[cellIdx] = { ...newGame[cellIdx], value: value.toString() }
+    const newCell = { ...newGame[cellIdx] }
+    if (!checkValidity(cellIdx, value)) {
+      setIsValid(false)
+      newCell.isInvalid = true
+      // TO-DO: mark all cells that are affected by this change as invalid
+    } else {
+      setIsValid(true)
+      newCell.isInvalid = false
+      // TO-DO: mark all cells that are affected by this change as valid
+    }
+
+    newCell.value = value.toString()
+    newGame[cellIdx] = newCell
     setGame(newGame)
   }
 
@@ -75,6 +86,7 @@ const Game = ({ id, initialState }: { id: string; initialState: string }) => {
     }
   }, [id, initialState])
 
+  // so that this useEffect only runs once
   const firedRef = useRef(false)
   useEffect(() => {
     if (firedRef.current || game.length === 0) return
@@ -92,6 +104,22 @@ const Game = ({ id, initialState }: { id: string; initialState: string }) => {
     setColsMap(colsMap)
     setSubgridsMap(subgridsMap)
   }, [game])
+
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      const isNumericKey = event.key >= "1" && event.key <= "9"
+
+      if (isNumericKey) {
+        handleAdd(selectedCell, parseInt(event.key, 10))
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyPress)
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyPress)
+    }
+  }, [])
 
   return (
     <div>
