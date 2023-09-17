@@ -46,7 +46,7 @@ const GameContainer = ({ puzzles }: { puzzles: Game[] }) => {
   )
 
   return (
-    <div>
+    <div className="flex flex-col align-baseline w-full">
       <SudokuGame
         id={selectedPuzzleId}
         initialState={
@@ -93,7 +93,9 @@ const PuzzlesPicker = ({
         {puzzles.map((puzzle, idx) => (
           <ListItem
             key={puzzle.id}
-            onClick={() => handleSelect(puzzle.id)}
+            onClick={() =>
+              puzzle.id !== selectedPuzzle && handleSelect(puzzle.id)
+            }
             text={`Puzzle ${idx + 1}`}
             isSelected={puzzle.id === selectedPuzzle}
           />
@@ -123,6 +125,7 @@ const ConfirmationDialog = ({
       isOpen={isOpen}
       leastDestructiveRef={cancelRef}
       onClose={onClose}
+      isCentered
     >
       <AlertDialogOverlay>
         <AlertDialogContent>
@@ -138,7 +141,11 @@ const ConfirmationDialog = ({
             <Button ref={cancelRef} onClick={onClose}>
               Cancel
             </Button>
-            <Button onClick={handleConfirmation} ml={3}>
+            <Button
+              className="bg-red-500 text-white"
+              onClick={handleConfirmation}
+              ml={3}
+            >
               Confirm
             </Button>
           </AlertDialogFooter>
