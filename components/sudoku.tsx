@@ -4,12 +4,7 @@ import { useEffect, useState } from "react"
 import Confetti from "react-confetti"
 
 import storage from "@/lib/storage"
-import {
-  Cell,
-  EMPTY_CELL,
-  initializeInvalidCells,
-  isValidInput,
-} from "@/lib/sudoku"
+import { EMPTY_CELL, initializeInvalidCells, isValidInput } from "@/lib/sudoku"
 import { convertToMatrix, getCellIdx } from "@/lib/matrix"
 import NumPad from "./numpad"
 
@@ -132,6 +127,7 @@ const Game = ({ id, initialState }: { id: string; initialState: string }) => {
         handleClick={(value: number) =>
           handleAdd(selectedCell, value.toString())
         }
+        handleDelete={() => handleDelete(selectedCell)}
       />
       {isComplete && <Confetti />}
     </div>

@@ -2,12 +2,6 @@ import { FlattenedMatrix, getColIdx, getRowIdx, getSubgridIdx } from "./matrix"
 
 export const EMPTY_CELL = "."
 
-export type Cell = {
-  value: string
-  isEditable: boolean
-  isInvalid: boolean
-}
-
 /**
  * Given an array of sudoku cells, returns the set of invalid cells.
  * @param {Cell[]} cells
