@@ -6,7 +6,7 @@ import Confetti from "react-confetti"
 import storage from "@/lib/storage"
 import {
   Cell,
-  checkValidity,
+  EMPTY_CELL,
   initializeInvalidCells,
   isValidInput,
 } from "@/lib/sudoku"
@@ -25,12 +25,12 @@ const Game = ({ id, initialState }: { id: string; initialState: string }) => {
     setSelectedCell(cellIdx)
   }
 
-  const handleAdd = (cellIdx: number, value: number) => {
+  const handleAdd = (cellIdx: number, value: string) => {
     if (!isValidInput(cellIdx, value)) return
 
     const newGame = [...game]
     const newCell = { ...newGame[cellIdx] }
-    newCell.value = value.toString()
+    newCell.value = value
     newGame[cellIdx] = newCell
 
     let numsFilled = 0
@@ -38,7 +38,7 @@ const Game = ({ id, initialState }: { id: string; initialState: string }) => {
     console.log("invalidCells", invalidCells)
     for (let i = 0; i < FLATTENED_SIZE; i++) {
       const newCell = { ...newGame[i] }
-      if (newCell.value !== ".") {
+      if (newCell.value !== EMPTY_CELL) {
         numsFilled++
       }
 
@@ -56,9 +56,14 @@ const Game = ({ id, initialState }: { id: string; initialState: string }) => {
     setGame(newGame)
   }
 
-  // run everytime the game changes
+  const handleDelete = (cellIdx: number) => {
+    handleAdd(cellIdx, EMPTY_CELL)
+  }
+
+  // initialization, runs everytime a new game is selected
   useEffect(() => {
     if (id === "" || initialState === "") return
+
     console.log("initializing game", id, initialState)
     setSelectedCell(-1)
     const existingGame = storage.get(id)
@@ -69,7 +74,7 @@ const Game = ({ id, initialState }: { id: string; initialState: string }) => {
       for (let i = 0; i < FLATTENED_SIZE; i++) {
         newGame[i] = {
           value: initialState[i],
-          isEditable: initialState[i] === ".",
+          isEditable: initialState[i] === EMPTY_CELL,
           isInvalid: false,
         }
       }
@@ -89,12 +94,16 @@ const Game = ({ id, initialState }: { id: string; initialState: string }) => {
     }
   }, [id, initialState])
 
+  // handles key presses
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
       const isNumericKey = event.key >= "1" && event.key <= "9"
+      const isBackspace = event.key === "Backspace"
 
       if (isNumericKey) {
-        handleAdd(selectedCell, parseInt(event.key, 10))
+        handleAdd(selectedCell, event.key)
+      } else if (isBackspace) {
+        handleDelete(selectedCell)
       }
     }
 
@@ -105,6 +114,7 @@ const Game = ({ id, initialState }: { id: string; initialState: string }) => {
     }
   }, [selectedCell])
 
+  // handles saving to storage
   useEffect(() => {
     if (game.length === 0) return
 
@@ -112,13 +122,17 @@ const Game = ({ id, initialState }: { id: string; initialState: string }) => {
   }, [game, id])
 
   return (
-    <div>
+    <div className="flex gap-8">
       <Board
         game={game}
         selectedCell={selectedCell}
         handleSelectChange={handleSelectChange}
       />
-      <NumPad handleClick={(value: number) => handleAdd(selectedCell, value)} />
+      <NumPad
+        handleClick={(value: number) =>
+          handleAdd(selectedCell, value.toString())
+        }
+      />
       {isComplete && <Confetti />}
     </div>
   )
@@ -136,11 +150,11 @@ const Board = ({
   handleSelectChange: (cellIdx: number) => void
 }) => {
   return (
-    <table className="relative w-25vw h-25vw table-fixed">
-      <colgroup className="border-2 border-black">
-        <col span={3} className="border border-solid border-black" />
-        <col span={3} className="border border-solid border-black" />
-        <col span={3} className="border border-solid border-black" />
+    <table className="relative w-[40vw] h-[40vw] table-fixed">
+      <colgroup className="border-4 border-black">
+        <col span={3} className="border-2 border-gray-500" />
+        <col span={3} className="border-2 border-gray-500" />
+        <col span={3} className="border-2 border-gray-500" />
       </colgroup>
       <tbody>
         {convertToMatrix(game).map((row: Cell[], rowIdx) => (
@@ -148,8 +162,8 @@ const Board = ({
             key={rowIdx}
             className={`${
               rowIdx % 3 === 2
-                ? "border-b-2 border-black"
-                : "border-b border-black"
+                ? "border-b-4 border-black"
+                : "border-b-2 border-gray-500"
             }`}
           >
             {row.map((cell: Cell, colIdx) => {
@@ -158,7 +172,7 @@ const Board = ({
                 <Cell
                   key={cellIdx}
                   // \u00A0 is a hack to prevent empty rows from collapsing
-                  value={cell.value === "." ? "\u00A0" : cell.value}
+                  value={cell.value === EMPTY_CELL ? "\u00A0" : cell.value}
                   idx={cellIdx}
                   isFocused={selectedCell === cellIdx}
                   onFocusChange={handleSelectChange}
@@ -191,21 +205,23 @@ const Cell = ({
 }) => {
   return (
     <td
-      className={`${idx % 3 === 2 ? "border-r-2 border-black " : ""} ${
+      className={`${idx % 3 === 2 ? "border-r-4 border-black" : ""} ${
         isEditable ? "cursor-pointer" : "bg-gray-200"
       } ${isFocused ? "bg-blue-200" : ""}`}
     >
       <div
-        className={`flex justify-center relative`}
+        className="flex h-full justify-center items-center relative"
         onClick={() => {
           if (!isEditable) return
           onFocusChange(idx)
         }}
       >
-        {value}
-        {isInvalid && (
-          <div className="w-[5px] h-[5px] bottom-[0px] right-[1px] absolute rounded-full bg-red-500" />
-        )}
+        <p className="text-4xl font-bold text-gray-900">{value}</p>
+        <div
+          className={`w-[10px] h-[10px] bottom-[5px] right-[5px] absolute rounded-full bg-red-500 transition-all duration-250 delay-100 ease-in scale-100 ${
+            isInvalid ? "scale3d-100" : "scale3d-0"
+          }`}
+        />
       </div>
     </td>
   )

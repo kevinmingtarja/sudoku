@@ -1,5 +1,6 @@
-import assert from "assert"
 import { FlattenedMatrix, getColIdx, getRowIdx, getSubgridIdx } from "./matrix"
+
+export const EMPTY_CELL = "."
 
 export type Cell = {
   value: string
@@ -75,8 +76,13 @@ export const initializeInvalidCells = (cells: Cell[]) => {
   return invalidCells
 }
 
-export const isValidInput = (cellIdx: number, value: number): boolean => {
-  return cellIdx >= 0 && cellIdx <= 80 && value >= 1 && value <= 9
+export const isValidInput = (cellIdx: number, value: string): boolean => {
+  const intValue = parseInt(value, 10)
+  return (
+    cellIdx >= 0 &&
+    cellIdx <= 80 &&
+    (value === "." || (intValue >= 1 && intValue <= 9))
+  )
 }
 
 // traverse the startingCell's row, col, subgrid
