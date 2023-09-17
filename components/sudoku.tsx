@@ -1,17 +1,16 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
+import Confetti from "react-confetti"
 
 import storage from "@/lib/storage"
-import { Cell, initializeInvalidCells } from "@/lib/sudoku"
 import {
-  FlattenedMatrix,
-  convertToMatrix,
-  getCellIdx,
-  getColIdx,
-  getRowIdx,
-  getSubgridIdx,
-} from "@/lib/matrix"
+  Cell,
+  checkValidity,
+  initializeInvalidCells,
+  isValidInput,
+} from "@/lib/sudoku"
+import { convertToMatrix, getCellIdx } from "@/lib/matrix"
 import NumPad from "./numpad"
 
 const FLATTENED_SIZE = 81
@@ -19,56 +18,49 @@ const FLATTENED_SIZE = 81
 const Game = ({ id, initialState }: { id: string; initialState: string }) => {
   const [game, setGame] = useState<Cell[]>([])
   const [selectedCell, setSelectedCell] = useState(-1)
-  const [isValid, setIsValid] = useState<boolean>(true)
-
-  const [rowsMap, setRowsMap] = useState<FlattenedMatrix<number>>()
-  const [colsMap, setColsMap] = useState<FlattenedMatrix<number>>()
-  const [subgridsMap, setSubgridsMap] = useState<FlattenedMatrix<number>>()
+  const [isComplete, setIsComplete] = useState(false)
+  console.log(selectedCell, game)
 
   const handleSelectChange = (cellIdx: number) => {
     setSelectedCell(cellIdx)
   }
 
-  const checkValidity = (cellIdx: number, value: number) => {
-    if (rowsMap && colsMap && subgridsMap) {
-      const row = getRowIdx(cellIdx)
-      const col = getColIdx(cellIdx)
-      const subgrid = getSubgridIdx(cellIdx)
-
-      const mapIdx = value - 1
-      const isRowValid = rowsMap.get(row, mapIdx) === 0
-      const isColValid = colsMap.get(col, mapIdx) === 0
-      const isSubgridValid = subgridsMap.get(subgrid, mapIdx) === 0
-
-      return isRowValid && isColValid && isSubgridValid
-    }
-    return false
-  }
-
   const handleAdd = (cellIdx: number, value: number) => {
-    if (!isValid || cellIdx < 0 || cellIdx > 80 || value < 1 || value > 9)
-      return
+    if (!isValidInput(cellIdx, value)) return
 
     const newGame = [...game]
     const newCell = { ...newGame[cellIdx] }
-    if (!checkValidity(cellIdx, value)) {
-      setIsValid(false)
-      newCell.isInvalid = true
-      // TO-DO: mark all cells that are affected by this change as invalid
-    } else {
-      setIsValid(true)
-      newCell.isInvalid = false
-      // TO-DO: mark all cells that are affected by this change as valid
-    }
-
     newCell.value = value.toString()
     newGame[cellIdx] = newCell
+
+    let numsFilled = 0
+    const invalidCells = initializeInvalidCells(newGame)
+    console.log("invalidCells", invalidCells)
+    for (let i = 0; i < FLATTENED_SIZE; i++) {
+      const newCell = { ...newGame[i] }
+      if (newCell.value !== ".") {
+        numsFilled++
+      }
+
+      newCell.isInvalid = false
+      if (invalidCells.has(i)) {
+        newCell.isInvalid = true
+      }
+      newGame[i] = newCell
+    }
+
+    if (numsFilled === FLATTENED_SIZE && invalidCells.size === 0) {
+      setIsComplete(true)
+    }
+
     setGame(newGame)
   }
 
+  // run everytime the game changes
   useEffect(() => {
     if (id === "" || initialState === "") return
-
+    console.log("initializing game", id, initialState)
+    setSelectedCell(-1)
     const existingGame = storage.get(id)
     if (existingGame) {
       setGame(JSON.parse(existingGame))
@@ -78,32 +70,24 @@ const Game = ({ id, initialState }: { id: string; initialState: string }) => {
         newGame[i] = {
           value: initialState[i],
           isEditable: initialState[i] === ".",
-          isInvalid: false, // assume all initial values are valid
+          isInvalid: false,
         }
       }
+
+      const invalidCells = initializeInvalidCells(newGame)
+      if (Array.from(invalidCells).length > 0) {
+        invalidCells.forEach((cellIdx) => {
+          const newCell = { ...newGame[cellIdx] }
+          newCell.isInvalid = true
+          newGame[cellIdx] = newCell
+        })
+      }
+      console.log("invalidCells", invalidCells)
+
       storage.set(id, JSON.stringify(newGame))
       setGame(newGame)
     }
   }, [id, initialState])
-
-  // so that this useEffect only runs once
-  const firedRef = useRef(false)
-  useEffect(() => {
-    if (firedRef.current || game.length === 0) return
-
-    firedRef.current = true
-    const { invalidCells, rowsMap, colsMap, subgridsMap } =
-      initializeInvalidCells(game)
-
-    if (Array.from(invalidCells).length > 0) {
-      setIsValid(false)
-    }
-
-    console.log(invalidCells, rowsMap, colsMap, subgridsMap)
-    setRowsMap(rowsMap)
-    setColsMap(colsMap)
-    setSubgridsMap(subgridsMap)
-  }, [game])
 
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
@@ -119,7 +103,13 @@ const Game = ({ id, initialState }: { id: string; initialState: string }) => {
     return () => {
       document.removeEventListener("keydown", handleKeyPress)
     }
-  }, [])
+  }, [selectedCell])
+
+  useEffect(() => {
+    if (game.length === 0) return
+
+    storage.set(id, JSON.stringify(game))
+  }, [game, id])
 
   return (
     <div>
@@ -129,6 +119,7 @@ const Game = ({ id, initialState }: { id: string; initialState: string }) => {
         handleSelectChange={handleSelectChange}
       />
       <NumPad handleClick={(value: number) => handleAdd(selectedCell, value)} />
+      {isComplete && <Confetti />}
     </div>
   )
 }
@@ -202,16 +193,19 @@ const Cell = ({
     <td
       className={`${idx % 3 === 2 ? "border-r-2 border-black " : ""} ${
         isEditable ? "cursor-pointer" : "bg-gray-200"
-      } ${isFocused ? "bg-blue-200" : ""} ${isInvalid ? "bg-red-200" : ""}`}
+      } ${isFocused ? "bg-blue-200" : ""}`}
     >
       <div
-        className={`flex justify-center`}
+        className={`flex justify-center relative`}
         onClick={() => {
           if (!isEditable) return
           onFocusChange(idx)
         }}
       >
         {value}
+        {isInvalid && (
+          <div className="w-[5px] h-[5px] bottom-[0px] right-[1px] absolute rounded-full bg-red-500" />
+        )}
       </div>
     </td>
   )

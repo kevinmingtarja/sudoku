@@ -8,25 +8,19 @@ export type Cell = {
 }
 
 /**
- * Given an array of sudoku cells, returns the set of invalid cells,
- * and a map of the rows, columns, and subgrids, to support
- * fast lookups of whether a value already exists
- * in a given row, column, or subgrid.
+ * Given an array of sudoku cells, returns the set of invalid cells.
  * @param {Cell[]} cells
- * @returns { Set<number>(), FlattenedMatrix<number>, FlattenedMatrix<number>, FlattenedMatrix<number> }
+ * @returns { Set<number>() }
  */
 export const initializeInvalidCells = (cells: Cell[]) => {
   if (cells.length !== 81) {
     throw new Error("Expected 81 cells")
   }
-  // cols = [f f f f t f f f f | T f t f f f f f f | ...]
-  //         0 1 2 3 4 5 6 7 8 | 0 1 2 3 4 5 6 7 8 | ...]
-  //              col 0                col 1
 
   const invalidCells = new Set<number>()
-  const rowsMap = new FlattenedMatrix<number>(9, 9, new Array(81).fill(0))
-  const colsMap = new FlattenedMatrix<number>(9, 9, new Array(81).fill(0))
-  const subgridsMap = new FlattenedMatrix<number>(9, 9, new Array(81).fill(0))
+  const rowsMap = new FlattenedMatrix<Set<number>>(9, 9, new Array(81))
+  const colsMap = new FlattenedMatrix<Set<number>>(9, 9, new Array(81))
+  const subgridsMap = new FlattenedMatrix<Set<number>>(9, 9, new Array(81))
 
   for (let i = 0; i < cells.length; i++) {
     if (cells[i].value === ".") continue
@@ -35,38 +29,102 @@ export const initializeInvalidCells = (cells: Cell[]) => {
     const col = getColIdx(i)
     const subgrid = getSubgridIdx(i)
 
-    if (
-      rowsMap.get(row, col) !== 0 ||
-      colsMap.get(row, col) !== 0 ||
-      subgridsMap.get(row, col) !== 0
-    ) {
-      assert(cells[i].isEditable === false, "Input sudoku is invalid")
-
-      // if an uneditable cell already exists, we don't want to
-      // overwrite it
-      if (cells[i].isEditable) {
-        invalidCells.add(i)
-        if (rowsMap.get(row, col) !== 0) {
-          invalidCells.add(rowsMap.get(row, col))
-        }
-        if (colsMap.get(row, col) !== 0) {
-          invalidCells.add(colsMap.get(row, col))
-        }
-        if (subgridsMap.get(row, col) !== 0) {
-          invalidCells.add(subgridsMap.get(row, col))
-        }
-
-        continue
-      }
-    }
-
     const value = parseInt(cells[i].value, 10)
     const idx = value - 1
 
-    rowsMap.put(row, idx, i)
-    colsMap.put(col, idx, i)
-    subgridsMap.put(subgrid, idx, i)
+    const currRowSet = rowsMap.get(row, idx)
+    if (currRowSet === undefined) {
+      rowsMap.put(row, idx, new Set([i]))
+    } else {
+      currRowSet.add(i)
+
+      // if currRowSet is defined, then a value already exists in the row
+      currRowSet.forEach((cell) => {
+        invalidCells.add(cell)
+      })
+      invalidCells.add(i)
+    }
+
+    const currColSet = colsMap.get(col, idx)
+    if (currColSet === undefined) {
+      colsMap.put(col, idx, new Set<number>([i]))
+    } else {
+      currColSet.add(i)
+
+      // if currColSet is defined, then a value already exists in the col
+      currColSet.forEach((cell) => {
+        invalidCells.add(cell)
+      })
+      invalidCells.add(i)
+    }
+
+    const currSubgridSet = subgridsMap.get(subgrid, idx)
+    if (currSubgridSet === undefined) {
+      subgridsMap.put(subgrid, idx, new Set<number>([i]))
+    } else {
+      currSubgridSet.add(i)
+
+      // if currSubgridSet is defined, then a value already exists in the subgrid
+      currSubgridSet.forEach((cell) => {
+        invalidCells.add(cell)
+      })
+      invalidCells.add(i)
+    }
   }
 
-  return { invalidCells, rowsMap, colsMap, subgridsMap }
+  return invalidCells
+}
+
+export const isValidInput = (cellIdx: number, value: number): boolean => {
+  return cellIdx >= 0 && cellIdx <= 80 && value >= 1 && value <= 9
+}
+
+// traverse the startingCell's row, col, subgrid
+export const checkValidity = (startingCellIdx: number, cells: Cell[]) => {
+  const row = getRowIdx(startingCellIdx)
+  const col = getColIdx(startingCellIdx)
+  const subgrid = getSubgridIdx(startingCellIdx)
+
+  const value = parseInt(cells[startingCellIdx].value, 10)
+  const idx = value - 1
+
+  const invalidCells = new Set<number>()
+  for (let i = 0; i < 9; i++) {
+    // check row
+    let currCellIdx = row * 9 + i
+    if (
+      currCellIdx !== startingCellIdx &&
+      cells[currCellIdx].value === cells[startingCellIdx].value
+    ) {
+      // duplicate
+      invalidCells.add(currCellIdx)
+      invalidCells.add(startingCellIdx)
+    }
+
+    // check col
+    currCellIdx = i * 9 + col
+    if (
+      currCellIdx !== startingCellIdx &&
+      cells[currCellIdx].value === cells[startingCellIdx].value
+    ) {
+      // duplicate
+      invalidCells.add(currCellIdx)
+      invalidCells.add(startingCellIdx)
+    }
+
+    // check subgrid
+    const currRow = Math.floor(i / 3)
+    const currCol = i % 3
+    currCellIdx = (subgrid * 3 + currRow) * 9 + (subgrid * 3 + currCol)
+    if (
+      currCellIdx !== startingCellIdx &&
+      cells[currCellIdx].value === cells[startingCellIdx].value
+    ) {
+      // duplicate
+      invalidCells.add(currCellIdx)
+      invalidCells.add(startingCellIdx)
+    }
+  }
+
+  return invalidCells
 }
