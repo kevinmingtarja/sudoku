@@ -4,7 +4,7 @@ import { RefObject, useEffect, useRef, useState } from "react"
 import Confetti from "react-confetti"
 
 import storage from "@/lib/storage"
-import { EMPTY_CELL, initializeInvalidCells, isValidInput } from "@/lib/sudoku"
+import { EMPTY_CELL, checkInvalidCells, isValidInput } from "@/lib/sudoku"
 import { convertToMatrix, getCellIdx } from "@/lib/matrix"
 import NumPad from "./numpad"
 import useTimer from "@/hooks/useTimer"
@@ -45,7 +45,7 @@ const Game = ({
     newGame[cellIdx] = newCell
 
     let numsFilled = 0
-    const invalidCells = initializeInvalidCells(newGame)
+    const invalidCells = checkInvalidCells(newGame)
 
     for (let i = 0; i < FLATTENED_SIZE; i++) {
       const newCell = { ...newGame[i] }
@@ -121,7 +121,7 @@ const Game = ({
         }
       }
 
-      const invalidCells = initializeInvalidCells(newGame)
+      const invalidCells = checkInvalidCells(newGame)
       if (Array.from(invalidCells).length > 0) {
         invalidCells.forEach((cellIdx) => {
           const newCell = { ...newGame[cellIdx] }
@@ -147,6 +147,9 @@ const Game = ({
         handleDelete(selectedCell)
       } else if (event.key === "Escape") {
         setSelectedCell(-1)
+      } else if (event.key === " ") {
+        event.preventDefault()
+        setIsPaused((curr) => !curr)
       } else if (
         event.key === "ArrowLeft" ||
         event.key === "ArrowRight" ||

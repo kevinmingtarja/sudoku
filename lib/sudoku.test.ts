@@ -1,7 +1,7 @@
 import { describe, expect, test } from "@jest/globals"
-import { initializeInvalidCells } from "@/lib/sudoku"
+import { checkInvalidCells } from "@/lib/sudoku"
 
-describe("testInitializeInvalidCells", () => {
+describe("checkInvalidCells", () => {
   test("valid sudoku 0", () => {
     const expectedInvalidCells = new Set<number>()
 
@@ -16,7 +16,7 @@ describe("testInitializeInvalidCells", () => {
       }
     }
 
-    const invalidCells = initializeInvalidCells(cells)
+    const invalidCells = checkInvalidCells(cells)
 
     expect(invalidCells).toEqual(expectedInvalidCells)
   })
@@ -39,7 +39,7 @@ describe("testInitializeInvalidCells", () => {
     expectedInvalidCells.add(5)
     expectedInvalidCells.add(18)
 
-    const invalidCells = initializeInvalidCells(cells)
+    const invalidCells = checkInvalidCells(cells)
 
     expect(invalidCells).toEqual(expectedInvalidCells)
   })
@@ -64,7 +64,7 @@ describe("testInitializeInvalidCells", () => {
     expectedInvalidCells.add(33)
     expectedInvalidCells.add(43)
 
-    const invalidCells = initializeInvalidCells(cells)
+    const invalidCells = checkInvalidCells(cells)
 
     expect(invalidCells).toEqual(expectedInvalidCells)
   })

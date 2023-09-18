@@ -2,6 +2,19 @@
 
 This is my submission for Mobbin's take home assignment.
 
+## Features
+
+- Full keyboard support:
+  - Use arrows to move around the board
+  - Numbers to input values
+  - Backspace to delete existing entries
+  - Space to pause/unpause
+  - Escape to deselect any cells
+- Mobile and table responsive
+- Multiple puzzles
+- Automatic pause everytime you leave or close the tab
+- Saved progress even if you leave and close the tab
+
 ## Tech Stack Notes
 
 The requirements states that Next.js, Tailwind CSS, and Supabase should be used. But nonetheless, I will start by researching on what these technologies have to offer, since that will equip me with the necessary knowledge for the next steps.
@@ -12,6 +25,8 @@ The requirements states that Next.js, Tailwind CSS, and Supabase should be used.
   I've also never used Tailwind CSS. I personally have always went with [CSS Modules](https://nextjs.org/docs/app/building-your-application/styling/css-modules) for styling, partly because of the local scoping they can do by creating unique class names. I also liked having the separation between the javascript stuff in the jsx/tsx files and the styling part in the css files. But anyways, I've always wanted to try Tailwind, and now is the time. I'm interested to compare and contrast between the two as well.
 - Supabase:
   Another interesting tech that I haven't got the chance to try on. Interested to see what stuff they add on on top of a normal postgres.
+- Chakra UI:
+  Has been my go-to for component libraries. Unfortunately, it only works in client-side components, but that's not too big of a problem for this project.
 
 ## Design
 
@@ -23,10 +38,6 @@ The requirements states that Next.js, Tailwind CSS, and Supabase should be used.
   - Allow users to pick from this list
   - Only one game can be in progress at any given time, progress will be lost if user starts a new game
 
-### Non Functional Requirements
-
--
-
 ### Sudoku Data Structure
 
 In the db, a puzzle is stored as a string of length 81 (9x9). In the frontend, we need to transform this to a data structure that allows for:
@@ -34,64 +45,48 @@ In the db, a puzzle is stored as a string of length 81 (9x9). In the frontend, w
 - Quick insertion of digits
 - Quick checking of validity
 - Differentiate cells that are prefilled vs editable
+- Mark cells that are breaking the rules
 - (Future work) Give hints/answers, and check correctness (not validity) of the current state
 
 Based on those requirements, I designed the data structure to be the following:
 
 - Array of length 81
 - Index corresponds to the cell number
-- To get cell position: ((i//9), (i%9))
+- To get (row, col) position: ((i//9), (i%9))
 - Each element is an object of the following:
   - value: int
   - isEditable: bool
+  - isInvalid: bool
 
-To check validity, we need to check each time a new digit is entered. We will maintain three hash maps in memory (row, col, sub-grid), which is constructed at the beginning of every game. Then at every step, we just update those maps. These maps will be a 9x9 matrix.
+To check validity, we need to check each time a new digit is entered. Right now, we are iterating through all 81 cells of the current state, and then checking whether each row, column, and subgrid has a duplicate or not. We use three hashmaps (represented as flattened 1D array), to support O(1) checking of duplicates in every iteration. This is done by `checkInvalidCells(cells: Cell[])` in `sudoku.ts`.
 
 ## Dev Setup
 
 ### Frontend
 
+Prerequisites: Create a `.env.local` and put the Supabase credentials there.
+
 ```bash
 npm run dev
 ```
 
-## Inspirations
+## Deployment
 
-- https://sudoku.com
-- https://www.websudoku.com/
-- https://www.nytimes.com/puzzles/sudoku
+This site is deployed with Vercel. Every push to main automatically gets deployed and promoted to production.
 
 ---
 
-## Getting Started
+## Tested On
 
-First, run the development server:
+- Chrome (v116.0)
+- Safari (v15.4)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-```
+## Known Issues
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- On Safari, the styling of the right border of the column groups are a bit off. On Chrome it works fine
+- Styling of the numpad breaks (the gap between numpad buttons) when width is around 1030px, right around the boundary between md and lg breakpoints.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Design Inspirations
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+- https://sudoku.com
+- https://www.nytimes.com/puzzles/sudoku

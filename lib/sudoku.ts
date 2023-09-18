@@ -8,7 +8,7 @@ export const EMPTY_CELL = "."
  * @param {Cell[]} cells
  * @returns { Set<number>() }
  */
-export const initializeInvalidCells = (cells: Cell[]) => {
+export const checkInvalidCells = (cells: Cell[]) => {
   if (cells.length !== 81) {
     throw new Error("Expected 81 cells")
   }
