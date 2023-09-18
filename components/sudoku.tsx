@@ -70,6 +70,32 @@ const Game = ({
     handleAdd(cellIdx, EMPTY_CELL)
   }
 
+  const handleArrowMovement = (
+    key: "ArrowLeft" | "ArrowRight" | "ArrowUp" | "ArrowDown"
+  ) => {
+    let curr = selectedCell
+
+    do {
+      if (curr < 0 || curr > 80) return
+      console.log(curr)
+      switch (key) {
+        case "ArrowLeft":
+          curr--
+          break
+        case "ArrowUp":
+          curr = curr - 9
+          break
+        case "ArrowRight":
+          curr++
+          break
+        case "ArrowDown":
+          curr = curr + 9
+          break
+      }
+    } while (curr >= 0 && curr <= 80 && !game[curr].isEditable)
+    if (curr >= 0 && curr <= 80) handleSelectChange(curr)
+  }
+
   useEffect(() => {
     setSize({ height: document.body.scrollHeight, width: window.innerWidth })
   }, [])
@@ -116,13 +142,22 @@ const Game = ({
   // handles key presses
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
-      const isNumericKey = event.key >= "1" && event.key <= "9"
-      const isBackspace = event.key === "Backspace"
-
-      if (isNumericKey) {
+      console.log(event.key)
+      if (event.key >= "1" && event.key <= "9") {
         handleAdd(selectedCell, event.key)
-      } else if (isBackspace) {
+      } else if (event.key === "Backspace") {
         handleDelete(selectedCell)
+      } else if (event.key === "Escape") {
+        setSelectedCell(-1)
+      } else if (
+        event.key === "ArrowLeft" ||
+        event.key === "ArrowRight" ||
+        event.key === "ArrowUp" ||
+        event.key === "ArrowDown"
+      ) {
+        if (selectedCell === -1) return
+        event.preventDefault()
+        handleArrowMovement(event.key)
       }
     }
 
@@ -228,7 +263,7 @@ const Board = ({
                   }
                   idx={cellIdx}
                   isFocused={selectedCell === cellIdx}
-                  onFocusChange={handleSelectChange}
+                  handleSelect={handleSelectChange}
                   isEditable={isPaused ? false : cell.isEditable}
                   isInvalid={cell.isInvalid}
                 />
@@ -246,14 +281,14 @@ const Cell = ({
   value,
   isEditable,
   isFocused,
-  onFocusChange,
+  handleSelect,
   isInvalid,
 }: {
   idx: number
   value: string
   isEditable: boolean
   isFocused: boolean
-  onFocusChange: (cellIdx: number) => void
+  handleSelect: (cellIdx: number) => void
   isInvalid: boolean
 }) => {
   return (
@@ -266,10 +301,10 @@ const Cell = ({
         className="flex h-full justify-center items-center relative"
         onClick={() => {
           if (!isEditable) return
-          onFocusChange(idx)
+          handleSelect(idx)
         }}
       >
-        <p className="text-4xl font-bold text-gray-900">{value}</p>
+        <p className="text-4xl font-bold text-gray-900 select-none">{value}</p>
         <div
           className={`w-[10px] h-[10px] bottom-[5px] right-[5px] absolute rounded-full bg-red-500 transition-all duration-250 delay-100 ease-in scale-100 ${
             isInvalid ? "scale3d-100" : "scale3d-0"
