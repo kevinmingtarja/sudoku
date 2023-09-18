@@ -1,5 +1,6 @@
 import { describe, expect, test } from "@jest/globals"
 import { checkInvalidCells } from "@/lib/sudoku"
+import { EMPTY_CELL, FLATTENED_SIZE } from "./constants"
 
 describe("checkInvalidCells", () => {
   test("valid sudoku 0", () => {
@@ -7,11 +8,11 @@ describe("checkInvalidCells", () => {
 
     const input =
       "52...6.........7.13...........4..8..6......5...........418.........3..2...87....."
-    const cells: Cell[] = new Array(81).fill(0)
-    for (let i = 0; i < 81; i++) {
+    const cells: Cell[] = new Array(FLATTENED_SIZE).fill(0)
+    for (let i = 0; i < FLATTENED_SIZE; i++) {
       cells[i] = {
         value: input[i],
-        isEditable: input[i] === ".",
+        isEditable: input[i] === EMPTY_CELL,
         isInvalid: false, // assume all initial values are valid
       }
     }
@@ -26,11 +27,11 @@ describe("checkInvalidCells", () => {
 
     const input =
       "52...5.........7.15...........4..8..6......5...........418.........3..2...87....."
-    const cells: Cell[] = new Array(81).fill(0)
-    for (let i = 0; i < 81; i++) {
+    const cells: Cell[] = new Array(FLATTENED_SIZE).fill(0)
+    for (let i = 0; i < FLATTENED_SIZE; i++) {
       cells[i] = {
         value: input[i],
-        isEditable: input[i] === ".",
+        isEditable: input[i] === EMPTY_CELL,
         isInvalid: false, // assume all initial values are valid
       }
     }
@@ -49,11 +50,11 @@ describe("checkInvalidCells", () => {
 
     const input =
       "52...5.........7.13...........5..5..6......5...........418.........3..2...87....."
-    const cells: Cell[] = new Array(81).fill(0)
-    for (let i = 0; i < 81; i++) {
+    const cells: Cell[] = new Array(FLATTENED_SIZE).fill(0)
+    for (let i = 0; i < FLATTENED_SIZE; i++) {
       cells[i] = {
         value: input[i],
-        isEditable: input[i] === ".",
+        isEditable: input[i] === EMPTY_CELL,
         isInvalid: false, // assume all initial values are valid
       }
     }

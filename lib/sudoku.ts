@@ -1,6 +1,5 @@
+import { EMPTY_CELL, FLATTENED_SIZE } from "./constants"
 import { FlattenedMatrix, getColIdx, getRowIdx, getSubgridIdx } from "./matrix"
-
-export const EMPTY_CELL = "."
 
 /**
  * Given an array of sudoku cells, returns the set of invalid cells.
@@ -9,17 +8,29 @@ export const EMPTY_CELL = "."
  * @returns { Set<number>() }
  */
 export const checkInvalidCells = (cells: Cell[]) => {
-  if (cells.length !== 81) {
+  if (cells.length !== FLATTENED_SIZE) {
     throw new Error("Expected 81 cells")
   }
 
   const invalidCells = new Set<number>()
-  const rowsMap = new FlattenedMatrix<Set<number>>(9, 9, new Array(81))
-  const colsMap = new FlattenedMatrix<Set<number>>(9, 9, new Array(81))
-  const subgridsMap = new FlattenedMatrix<Set<number>>(9, 9, new Array(81))
+  const rowsMap = new FlattenedMatrix<Set<number>>(
+    9,
+    9,
+    new Array(FLATTENED_SIZE)
+  )
+  const colsMap = new FlattenedMatrix<Set<number>>(
+    9,
+    9,
+    new Array(FLATTENED_SIZE)
+  )
+  const subgridsMap = new FlattenedMatrix<Set<number>>(
+    9,
+    9,
+    new Array(FLATTENED_SIZE)
+  )
 
   for (let i = 0; i < cells.length; i++) {
-    if (cells[i].value === ".") continue
+    if (cells[i].value === EMPTY_CELL) continue
 
     const row = getRowIdx(i)
     const col = getColIdx(i)
@@ -76,6 +87,6 @@ export const isValidInput = (cellIdx: number, value: string): boolean => {
   return (
     cellIdx >= 0 &&
     cellIdx <= 80 &&
-    (value === "." || (intValue >= 1 && intValue <= 9))
+    (value === EMPTY_CELL || (intValue >= 1 && intValue <= 9))
   )
 }

@@ -4,7 +4,7 @@ import { RefObject, useEffect, useRef, useState } from "react"
 import Confetti from "react-confetti"
 
 import storage from "@/lib/storage"
-import { EMPTY_CELL, checkInvalidCells, isValidInput } from "@/lib/sudoku"
+import { checkInvalidCells, isValidInput } from "@/lib/sudoku"
 import { convertToMatrix, getCellIdx } from "@/lib/matrix"
 import NumPad from "./numpad"
 import useTimer from "@/hooks/useTimer"
@@ -13,8 +13,7 @@ import { Button } from "@chakra-ui/react"
 import Dialog from "./dialog"
 import { secondsToTime } from "@/lib/time"
 import { usePageVisibility } from "@/hooks/usePageVisibility"
-
-const FLATTENED_SIZE = 81
+import { EMPTY_CELL, FLATTENED_SIZE } from "@/lib/constants"
 
 const Game = ({
   id,
