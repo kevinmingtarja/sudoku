@@ -7,14 +7,16 @@ import storage from "@/lib/storage"
 import { EMPTY_CELL, initializeInvalidCells, isValidInput } from "@/lib/sudoku"
 import { convertToMatrix, getCellIdx } from "@/lib/matrix"
 import NumPad from "./numpad"
+import useTimer from "@/hooks/useTimer"
+import Timer from "./timer"
 
 const FLATTENED_SIZE = 81
 
 const Game = ({ id, initialState }: { id: string; initialState: string }) => {
   const [game, setGame] = useState<Cell[]>([])
+  const { time, setTime, isPaused, setIsPaused, reset: resetTimer } = useTimer()
   const [selectedCell, setSelectedCell] = useState(-1)
   const [isComplete, setIsComplete] = useState(false)
-  console.log(selectedCell, game)
 
   const handleSelectChange = (cellIdx: number) => {
     setSelectedCell(cellIdx)
@@ -64,6 +66,8 @@ const Game = ({ id, initialState }: { id: string; initialState: string }) => {
     const existingGame = storage.get(id)
     if (existingGame) {
       setGame(JSON.parse(existingGame))
+      const lastTime = storage.get("time")
+      setTime(lastTime ? parseInt(lastTime, 10) : 0)
     } else {
       const newGame: Cell[] = new Array(FLATTENED_SIZE).fill(0)
       for (let i = 0; i < FLATTENED_SIZE; i++) {
@@ -86,6 +90,7 @@ const Game = ({ id, initialState }: { id: string; initialState: string }) => {
 
       storage.set(id, JSON.stringify(newGame))
       setGame(newGame)
+      resetTimer()
     }
   }, [id, initialState])
 
@@ -116,12 +121,23 @@ const Game = ({ id, initialState }: { id: string; initialState: string }) => {
     storage.set(id, JSON.stringify(game))
   }, [game, id])
 
+  useEffect(() => {
+    if (time === 0) return
+    storage.set("time", time.toString())
+  }, [time])
+
   return (
-    <div className="flex gap-8">
+    <div className="flex gap-8 mb-16">
+      <Timer
+        time={time}
+        isPaused={isPaused}
+        handlePause={() => setIsPaused((paused) => !paused)}
+      />
       <Board
         game={game}
         selectedCell={selectedCell}
         handleSelectChange={handleSelectChange}
+        isPaused={isPaused}
       />
       <NumPad
         handleClick={(value: number) =>
@@ -140,10 +156,12 @@ const Board = ({
   game,
   selectedCell,
   handleSelectChange,
+  isPaused,
 }: {
   game: Cell[]
   selectedCell: number
   handleSelectChange: (cellIdx: number) => void
+  isPaused: boolean
 }) => {
   return (
     <table className="relative w-[40vw] h-[40vw] table-fixed">
@@ -168,11 +186,15 @@ const Board = ({
                 <Cell
                   key={cellIdx}
                   // \u00A0 is a hack to prevent empty rows from collapsing
-                  value={cell.value === EMPTY_CELL ? "\u00A0" : cell.value}
+                  value={
+                    isPaused || cell.value === EMPTY_CELL
+                      ? "\u00A0"
+                      : cell.value
+                  }
                   idx={cellIdx}
                   isFocused={selectedCell === cellIdx}
                   onFocusChange={handleSelectChange}
-                  isEditable={cell.isEditable}
+                  isEditable={isPaused ? false : cell.isEditable}
                   isInvalid={cell.isInvalid}
                 />
               )
