@@ -1,14 +1,7 @@
+"use client"
+
 import { useState, useRef, RefObject } from "react"
-import {
-  useDisclosure,
-  AlertDialog,
-  AlertDialogOverlay,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogBody,
-  AlertDialogFooter,
-  Button,
-} from "@chakra-ui/react"
+import { useDisclosure, Button } from "@chakra-ui/react"
 
 import ListItem from "./list-item"
 import Dialog from "./dialog"
@@ -38,6 +31,12 @@ const PuzzlesPicker = ({
 
   return (
     <>
+      <h2
+        id="select-puzzles"
+        className="text-2xl font-bold tracking-tight text-gray-900 mb-2"
+      >
+        Select Puzzles
+      </h2>
       <ul role="list" className="divide-y divide-gray-100">
         {puzzles.map((puzzle, idx) => (
           <ListItem

@@ -14,7 +14,7 @@ const Timer = ({
 }) => {
   return (
     <div className={`flex items-center gap-1 ${className}`}>
-      <div className="w-16 text-xl">{secondsToTime(time)}</div>
+      <div className="w-16 text-xl text-gray-900">{secondsToTime(time)}</div>
       {isPaused ? (
         <HiPlay className="cursor-pointer" size={19} onClick={handlePause} />
       ) : (

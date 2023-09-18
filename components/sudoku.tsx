@@ -44,7 +44,7 @@ const Game = ({
 
     let numsFilled = 0
     const invalidCells = initializeInvalidCells(newGame)
-    console.log("invalidCells", invalidCells)
+
     for (let i = 0; i < FLATTENED_SIZE; i++) {
       const newCell = { ...newGame[i] }
       if (newCell.value !== EMPTY_CELL) {
@@ -77,7 +77,6 @@ const Game = ({
 
     do {
       if (curr < 0 || curr > 80) return
-      console.log(curr)
       switch (key) {
         case "ArrowLeft":
           curr--
@@ -104,7 +103,6 @@ const Game = ({
   useEffect(() => {
     if (id === "" || initialState === "") return
 
-    console.log("initializing game", id, initialState)
     setSelectedCell(-1)
     const existingGame = storage.get(id)
     if (existingGame) {
@@ -129,7 +127,6 @@ const Game = ({
           newGame[cellIdx] = newCell
         })
       }
-      console.log("invalidCells", invalidCells)
 
       storage.set(id, JSON.stringify(newGame))
       setGame(newGame)
@@ -142,7 +139,6 @@ const Game = ({
   // handles key presses
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
-      console.log(event.key)
       if (event.key >= "1" && event.key <= "9") {
         handleAdd(selectedCell, event.key)
       } else if (event.key === "Backspace") {
@@ -181,7 +177,7 @@ const Game = ({
   }, [time])
 
   return (
-    <div className="flex gap-8 mb-16 flex-col">
+    <div className="flex gap-8 mb-32 flex-col">
       <Timer
         className="w-full justify-center"
         time={time}
