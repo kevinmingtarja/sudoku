@@ -190,7 +190,7 @@ const Game = ({
         isPaused={isPaused}
         handlePause={() => setIsPaused((paused) => !paused)}
       />
-      <div className="flex flex-col gap-8 lg:flex-row">
+      <div className="flex flex-col gap-8 md:gap-4 lg:gap-6 lg:flex-row">
         <Board
           game={game}
           selectedCell={selectedCell}
@@ -306,7 +306,7 @@ const Cell = ({
           handleSelect(idx)
         }}
       >
-        <p className="text-2xl font-bold text-gray-900 select-none lg:text-4xl">
+        <p className="text-2xl font-bold text-gray-900 select-none md:text-3xl lg:text-4xl">
           {value}
         </p>
         <div

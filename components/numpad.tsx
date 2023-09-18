@@ -14,24 +14,24 @@ const NumPad = ({
         {Array.from({ length: 9 }, (_, idx) => (
           <Button
             key={idx}
-            className="p-0 min-w-0 bg-transparent hover:bg-transparent w-8 h-8 lg:bg-gray-200 lg:hover:bg-gray-300 lg:w-20 lg:h-20"
+            className="p-0 min-w-0 bg-transparent hover:bg-transparent w-8 h-8 md:w-16 md:h-16 lg:bg-gray-200 lg:hover:bg-gray-300 lg:w-20 lg:h-20"
             onClick={() => handleClick(idx + 1)}
           >
-            <p className="text-xl font-bold text-gray-900 lg:text-3xl">
+            <p className="text-xl font-bold text-gray-900 md:text-2xl lg:text-3xl">
               {idx + 1}
             </p>
           </Button>
         ))}
       </div>
       <Button
-        className="bg-gray-200 w-full hover:bg-gray-300 lg:h-16"
+        className="bg-gray-200 w-full md:h-12 hover:bg-gray-300 lg:h-16"
         onClick={handleDelete}
       >
         <p className="text-xl font-bold text-gray-900 lg:text-3xl">X</p>
       </Button>
 
       <p
-        className="text-md font-bold text-gray-900 mt-4 cursor-pointer lg:text-xl lg:mt-28"
+        className="text-md font-bold text-gray-900 mt-4 md:mt-8 cursor-pointer lg:text-xl lg:mt-28"
         onClick={() => scrollToId("select-puzzles")}
       >
         More puzzles <span aria-hidden="true">↓</span>
