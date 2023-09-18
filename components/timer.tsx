@@ -1,29 +1,28 @@
+import { secondsToTime } from "@/lib/time"
 import { HiMiniPause, HiPlay } from "react-icons/hi2"
 
 const Timer = ({
   time,
   isPaused,
   handlePause,
+  className,
 }: {
   time: number
   isPaused: boolean
   handlePause: () => void
+  className?: string
 }) => {
-  const secondsToTime = (seconds: number) => {
-    const m = Math.floor(seconds / 60)
-      .toString()
-      .padStart(2, "0")
-    const s = (seconds % 60).toString().padStart(2, "0")
-    return `${m}:${s}`
-  }
-
   return (
-    <div className="flex items-center gap-1">
-      {secondsToTime(time)}
+    <div className={`flex items-center gap-1 ${className}`}>
+      <div className="w-16 text-xl">{secondsToTime(time)}</div>
       {isPaused ? (
-        <HiPlay className="cursor-pointer" onClick={handlePause} />
+        <HiPlay className="cursor-pointer" size={19} onClick={handlePause} />
       ) : (
-        <HiMiniPause className="cursor-pointer" onClick={handlePause} />
+        <HiMiniPause
+          className="cursor-pointer"
+          size={19}
+          onClick={handlePause}
+        />
       )}
     </div>
   )

@@ -17,6 +17,15 @@ const GameContainer = ({ puzzles }: { puzzles: Game[] }) => {
     [selectedPuzzleId]
   )
 
+  const handleStartNewGame = (id: string) => {
+    let random = Math.floor(Math.random() * puzzles.length)
+    while (puzzles[random].id === id) {
+      console.log(random)
+      random = Math.floor(Math.random() * puzzles.length)
+    }
+    handleChangePuzzle(puzzles[random].id)
+  }
+
   useEffect(() => {
     const lastPuzzleId = storage.get("lastPuzzleId")
     if (lastPuzzleId) {
@@ -37,6 +46,7 @@ const GameContainer = ({ puzzles }: { puzzles: Game[] }) => {
         initialState={
           selectedPuzzle.length == 1 ? selectedPuzzle[0].puzzle : ""
         }
+        handleStartNewGame={handleStartNewGame}
       />
       <PuzzlesPicker
         puzzles={puzzles}

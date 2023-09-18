@@ -1,11 +1,13 @@
 import { LiHTMLAttributes } from "react"
 
-type ListItemProps = LiHTMLAttributes<HTMLLIElement> & {
+const ListItem = ({
+  text,
+  isSelected,
+  ...props
+}: LiHTMLAttributes<HTMLLIElement> & {
   text: string
   isSelected: boolean
-}
-
-const ListItem = ({ text, isSelected, ...props }: ListItemProps) => {
+}) => {
   return (
     <li {...props} className="flex justify-between gap-x-6 py-5 cursor-pointer">
       <div className="flex min-w-0 gap-x-4">

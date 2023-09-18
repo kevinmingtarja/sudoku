@@ -11,6 +11,7 @@ import {
 } from "@chakra-ui/react"
 
 import ListItem from "./list-item"
+import Dialog from "./dialog"
 
 const PuzzlesPicker = ({
   puzzles,
@@ -29,7 +30,7 @@ const PuzzlesPicker = ({
     onOpen()
   }
 
-  const handleConfirmation = () => {
+  const handleConfirm = () => {
     setSelectedPuzzle(toPick)
     setToPick("")
     onClose()
@@ -52,7 +53,7 @@ const PuzzlesPicker = ({
       <ConfirmationDialog
         isOpen={isOpen}
         onClose={onClose}
-        handleConfirmation={handleConfirmation}
+        handleConfirm={handleConfirm}
       />
     </>
   )
@@ -63,44 +64,34 @@ export default PuzzlesPicker
 const ConfirmationDialog = ({
   isOpen,
   onClose,
-  handleConfirmation,
+  handleConfirm,
 }: {
   isOpen: boolean
   onClose: () => void
-  handleConfirmation: () => void
+  handleConfirm: () => void
 }) => {
   const cancelRef = useRef() as RefObject<HTMLButtonElement>
   return (
-    <AlertDialog
+    <Dialog
+      header="Start New Game"
+      body="Are you sure? Current progress will be lost."
+      cancel={
+        <Button ref={cancelRef} onClick={onClose}>
+          Cancel
+        </Button>
+      }
+      confirm={
+        <Button
+          className="bg-red-500 text-white hover:bg-red-600"
+          onClick={handleConfirm}
+          ml={3}
+        >
+          Confirm
+        </Button>
+      }
       isOpen={isOpen}
-      leastDestructiveRef={cancelRef}
-      onClose={onClose}
-      isCentered
-    >
-      <AlertDialogOverlay>
-        <AlertDialogContent>
-          <AlertDialogHeader fontSize="lg" fontWeight="bold">
-            Start New Game
-          </AlertDialogHeader>
-
-          <AlertDialogBody>
-            Are you sure? Current progress will be lost.
-          </AlertDialogBody>
-
-          <AlertDialogFooter>
-            <Button ref={cancelRef} onClick={onClose}>
-              Cancel
-            </Button>
-            <Button
-              className="bg-red-500 text-white hover:bg-red-600"
-              onClick={handleConfirmation}
-              ml={3}
-            >
-              Confirm
-            </Button>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialogOverlay>
-    </AlertDialog>
+      handleCancel={onClose}
+      cancelRef={cancelRef}
+    />
   )
 }

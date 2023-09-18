@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { RefObject, useEffect, useRef, useState } from "react"
 import Confetti from "react-confetti"
 
 import storage from "@/lib/storage"
@@ -9,10 +9,22 @@ import { convertToMatrix, getCellIdx } from "@/lib/matrix"
 import NumPad from "./numpad"
 import useTimer from "@/hooks/useTimer"
 import Timer from "./timer"
+import { Button } from "@chakra-ui/react"
+import Dialog from "./dialog"
+import { secondsToTime } from "@/lib/time"
 
 const FLATTENED_SIZE = 81
 
-const Game = ({ id, initialState }: { id: string; initialState: string }) => {
+const Game = ({
+  id,
+  initialState,
+  handleStartNewGame,
+}: {
+  id: string
+  initialState: string
+  handleStartNewGame: (id: string) => void
+}) => {
+  const [size, setSize] = useState({ width: 0, height: 0 })
   const [game, setGame] = useState<Cell[]>([])
   const { time, setTime, isPaused, setIsPaused, reset: resetTimer } = useTimer()
   const [selectedCell, setSelectedCell] = useState(-1)
@@ -23,7 +35,7 @@ const Game = ({ id, initialState }: { id: string; initialState: string }) => {
   }
 
   const handleAdd = (cellIdx: number, value: string) => {
-    if (!isValidInput(cellIdx, value)) return
+    if (isPaused || !isValidInput(cellIdx, value)) return
 
     const newGame = [...game]
     const newCell = { ...newGame[cellIdx] }
@@ -48,6 +60,7 @@ const Game = ({ id, initialState }: { id: string; initialState: string }) => {
 
     if (numsFilled === FLATTENED_SIZE && invalidCells.size === 0) {
       setIsComplete(true)
+      setIsPaused(true)
     }
 
     setGame(newGame)
@@ -56,6 +69,10 @@ const Game = ({ id, initialState }: { id: string; initialState: string }) => {
   const handleDelete = (cellIdx: number) => {
     handleAdd(cellIdx, EMPTY_CELL)
   }
+
+  useEffect(() => {
+    setSize({ height: document.body.scrollHeight, width: window.innerWidth })
+  }, [])
 
   // initialization, runs everytime a new game is selected
   useEffect(() => {
@@ -91,6 +108,8 @@ const Game = ({ id, initialState }: { id: string; initialState: string }) => {
       storage.set(id, JSON.stringify(newGame))
       setGame(newGame)
       resetTimer()
+      setIsPaused(false)
+      setIsComplete(false)
     }
   }, [id, initialState])
 
@@ -127,25 +146,39 @@ const Game = ({ id, initialState }: { id: string; initialState: string }) => {
   }, [time])
 
   return (
-    <div className="flex gap-8 mb-16">
+    <div className="flex gap-8 mb-16 flex-col">
       <Timer
+        className="w-full justify-center"
         time={time}
         isPaused={isPaused}
         handlePause={() => setIsPaused((paused) => !paused)}
       />
-      <Board
-        game={game}
-        selectedCell={selectedCell}
-        handleSelectChange={handleSelectChange}
-        isPaused={isPaused}
-      />
-      <NumPad
-        handleClick={(value: number) =>
-          handleAdd(selectedCell, value.toString())
+      <div className="flex gap-8">
+        <Board
+          game={game}
+          selectedCell={selectedCell}
+          handleSelectChange={handleSelectChange}
+          isPaused={isPaused}
+          isComplete={isComplete}
+        />
+        <NumPad
+          handleClick={(value: number) =>
+            handleAdd(selectedCell, value.toString())
+          }
+          handleDelete={() => handleDelete(selectedCell)}
+        />
+        {isComplete && <Confetti height={size.height} width={size.width} />}
+        {
+          <CompletionDialog
+            time={time}
+            handleConfirm={() => {
+              handleStartNewGame(id)
+            }}
+            isOpen={isComplete}
+            onClose={() => handleStartNewGame(id)}
+          />
         }
-        handleDelete={() => handleDelete(selectedCell)}
-      />
-      {isComplete && <Confetti />}
+      </div>
     </div>
   )
 }
@@ -157,11 +190,13 @@ const Board = ({
   selectedCell,
   handleSelectChange,
   isPaused,
+  isComplete,
 }: {
   game: Cell[]
   selectedCell: number
   handleSelectChange: (cellIdx: number) => void
   isPaused: boolean
+  isComplete: boolean
 }) => {
   return (
     <table className="relative w-[40vw] h-[40vw] table-fixed">
@@ -187,7 +222,7 @@ const Board = ({
                   key={cellIdx}
                   // \u00A0 is a hack to prevent empty rows from collapsing
                   value={
-                    isPaused || cell.value === EMPTY_CELL
+                    (isPaused && !isComplete) || cell.value === EMPTY_CELL
                       ? "\u00A0"
                       : cell.value
                   }
@@ -242,5 +277,37 @@ const Cell = ({
         />
       </div>
     </td>
+  )
+}
+
+const CompletionDialog = ({
+  time,
+  isOpen,
+  onClose,
+  handleConfirm,
+}: {
+  time: number
+  isOpen: boolean
+  onClose: () => void
+  handleConfirm: () => void
+}) => {
+  const cancelRef = useRef() as RefObject<HTMLButtonElement>
+  return (
+    <Dialog
+      header="Congratulations 🎉"
+      body={`You completed the game in ${secondsToTime(time)}.`}
+      confirm={
+        <Button
+          className="bg-blue-500 text-white hover:bg-blue-600"
+          onClick={handleConfirm}
+          ml={3}
+        >
+          Start a new game
+        </Button>
+      }
+      isOpen={isOpen}
+      handleCancel={onClose}
+      cancelRef={cancelRef}
+    />
   )
 }
