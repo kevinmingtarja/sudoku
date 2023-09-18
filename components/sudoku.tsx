@@ -12,6 +12,7 @@ import Timer from "./timer"
 import { Button } from "@chakra-ui/react"
 import Dialog from "./dialog"
 import { secondsToTime } from "@/lib/time"
+import { usePageVisibility } from "@/hooks/usePageVisibility"
 
 const FLATTENED_SIZE = 81
 
@@ -29,6 +30,7 @@ const Game = ({
   const { time, setTime, isPaused, setIsPaused, reset: resetTimer } = useTimer()
   const [selectedCell, setSelectedCell] = useState(-1)
   const [isComplete, setIsComplete] = useState(false)
+  const isVisible = usePageVisibility()
 
   const handleSelectChange = (cellIdx: number) => {
     setSelectedCell(cellIdx)
@@ -176,6 +178,10 @@ const Game = ({
     storage.set("time", time.toString())
   }, [time])
 
+  useEffect(() => {
+    if (!isVisible) setIsPaused(true)
+  }, [isVisible])
+
   return (
     <div className="flex gap-4 mb-16 flex-col lg:gap-8">
       <Timer
@@ -258,7 +264,7 @@ const Board = ({
                       : cell.value
                   }
                   idx={cellIdx}
-                  isFocused={selectedCell === cellIdx}
+                  isSelected={selectedCell === cellIdx}
                   handleSelect={handleSelectChange}
                   isEditable={isPaused ? false : cell.isEditable}
                   isInvalid={cell.isInvalid}
@@ -276,14 +282,14 @@ const Cell = ({
   idx,
   value,
   isEditable,
-  isFocused,
+  isSelected,
   handleSelect,
   isInvalid,
 }: {
   idx: number
   value: string
   isEditable: boolean
-  isFocused: boolean
+  isSelected: boolean
   handleSelect: (cellIdx: number) => void
   isInvalid: boolean
 }) => {
@@ -291,7 +297,7 @@ const Cell = ({
     <td
       className={`${idx % 3 === 2 ? "border-r-4 border-black" : ""} ${
         isEditable ? "cursor-pointer" : "bg-gray-200"
-      } ${isFocused ? "bg-blue-200" : ""}`}
+      } ${isSelected ? "bg-blue-200" : ""}`}
     >
       <div
         className="flex h-full justify-center items-center relative"
