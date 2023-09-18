@@ -1,3 +1,10 @@
+/**
+ * FlattenedMatrix is a 2D Matrix represented as a 1D array.
+ * On paper this should be faster since it has better memory locality,
+ * but it depends really on how the javascript engine does things.
+ * This of course is a trades off readability, which is why
+ * this class along with its helper methods are created.
+ */
 export class FlattenedMatrix<T> {
   height: number
   width: number
@@ -9,10 +16,22 @@ export class FlattenedMatrix<T> {
     this.array = array
   }
 
+  /**
+   * Retrieves an element located in [row][col]
+   * @param row row in 2D matrix representation
+   * @param col col in 2D matrix representation
+   * @returns
+   */
   get(row: number, col: number) {
     return this.array[row * this.width + col]
   }
 
+  /**
+   * Assigns an element to [row][col]
+   * @param row row in 2D matrix representation
+   * @param col col in 2D matrix representation
+   * @param value value to be assigned
+   */
   put(row: number, col: number, value: T) {
     this.array[row * this.width + col] = value
   }

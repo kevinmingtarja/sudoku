@@ -1,5 +1,10 @@
 import { useState, useEffect, Dispatch, SetStateAction } from "react"
 
+/**
+ * Returns a time (in seconds) that starts at 0,
+ * increments every second, unless isPaused is true.
+ * The time can be reset by calling reset().
+ */
 const useTimer = (): {
   time: number
   setTime: Dispatch<SetStateAction<number>>

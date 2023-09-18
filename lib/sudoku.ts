@@ -4,6 +4,7 @@ export const EMPTY_CELL = "."
 
 /**
  * Given an array of sudoku cells, returns the set of invalid cells.
+ * Runs in O(n^2) time, but since n is just 9, this won't be a problem.
  * @param {Cell[]} cells
  * @returns { Set<number>() }
  */
