@@ -2,6 +2,8 @@ import supabase from "@/lib/supabase"
 
 import GameContainer from "@/components/game"
 
+export const revalidate = 60
+
 const Page = async () => {
   const { data: puzzles } = await supabase
     .from("sudoku_puzzles")
