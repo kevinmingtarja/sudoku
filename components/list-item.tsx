@@ -16,7 +16,7 @@ const ListItem = ({
       <div className="flex min-w-0 gap-x-4">
         <p className="text-md font-semibold leading-6 text-gray-900">{text}</p>
       </div>
-      <div className="hidden shrink-0 sm:flex sm:flex-col sm:items-end">
+      <div className="shrink-0 sm:flex sm:flex-col sm:items-end">
         {isSelected && (
           <div className="flex items-center gap-x-1.5">
             <span className="relative flex h-2 w-2">

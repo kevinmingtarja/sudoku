@@ -2,9 +2,9 @@
 
 import { useCallback, useEffect, useState } from "react"
 
-import SudokuGame from "@/components/sudoku"
+import SudokuGame from "./sudoku"
+import PuzzlesPicker from "./puzzles-picker"
 import storage from "@/lib/storage"
-import PuzzlesPicker from "@/components/puzzles-picker"
 
 const GameContainer = ({ puzzles }: { puzzles: Game[] }) => {
   const [selectedPuzzleId, setSelectedPuzzleId] = useState<string>("")
@@ -20,7 +20,6 @@ const GameContainer = ({ puzzles }: { puzzles: Game[] }) => {
   const handleStartNewGame = (id: string) => {
     let random = Math.floor(Math.random() * puzzles.length)
     while (puzzles[random].id === id) {
-      console.log(random)
       random = Math.floor(Math.random() * puzzles.length)
     }
     handleChangePuzzle(puzzles[random].id)

@@ -10,26 +10,28 @@ const NumPad = ({
 }) => {
   return (
     <div className="flex flex-col items-center">
-      <div className="grid grid-cols-3 h-fit gap-3 mb-2">
+      <div className="flex gap-0 h-fit mb-4 lg:mb-2 lg:gap-3 lg:grid lg:grid-cols-3">
         {Array.from({ length: 9 }, (_, idx) => (
           <Button
             key={idx}
-            className="bg-gray-200 w-20 h-20 hover:bg-gray-300"
+            className="p-0 min-w-0 bg-transparent hover:bg-transparent w-8 h-8 lg:bg-gray-200 lg:hover:bg-gray-300 lg:w-20 lg:h-20"
             onClick={() => handleClick(idx + 1)}
           >
-            <p className="text-3xl font-bold text-gray-900">{idx + 1}</p>
+            <p className="text-xl font-bold text-gray-900 lg:text-3xl">
+              {idx + 1}
+            </p>
           </Button>
         ))}
       </div>
       <Button
-        className="bg-gray-200 w-full h-16 hover:bg-gray-300"
+        className="bg-gray-200 w-full hover:bg-gray-300 lg:h-16"
         onClick={handleDelete}
       >
-        <p className="text-3xl font-bold text-gray-900">X</p>
+        <p className="text-xl font-bold text-gray-900 lg:text-3xl">X</p>
       </Button>
 
       <p
-        className="text-xl font-bold text-gray-900 mt-28 cursor-pointer"
+        className="text-md font-bold text-gray-900 mt-4 cursor-pointer lg:text-xl lg:mt-28"
         onClick={() => scrollToId("select-puzzles")}
       >
         More puzzles <span aria-hidden="true">↓</span>

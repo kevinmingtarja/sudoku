@@ -177,14 +177,14 @@ const Game = ({
   }, [time])
 
   return (
-    <div className="flex gap-8 mb-32 flex-col">
+    <div className="flex gap-4 mb-16 flex-col lg:gap-8">
       <Timer
         className="w-full justify-center"
         time={time}
         isPaused={isPaused}
         handlePause={() => setIsPaused((paused) => !paused)}
       />
-      <div className="flex gap-8">
+      <div className="flex flex-col gap-8 lg:flex-row">
         <Board
           game={game}
           selectedCell={selectedCell}
@@ -230,7 +230,7 @@ const Board = ({
   isComplete: boolean
 }) => {
   return (
-    <table className="relative w-[40vw] h-[40vw] table-fixed">
+    <table className="relative w-full h-[90vw] table-fixed lg:w-[40vw] lg:h-[40vw]">
       <colgroup className="border-4 border-black">
         <col span={3} className="border-2 border-gray-500" />
         <col span={3} className="border-2 border-gray-500" />
@@ -300,11 +300,13 @@ const Cell = ({
           handleSelect(idx)
         }}
       >
-        <p className="text-4xl font-bold text-gray-900 select-none">{value}</p>
+        <p className="text-2xl font-bold text-gray-900 select-none lg:text-4xl">
+          {value}
+        </p>
         <div
-          className={`w-[10px] h-[10px] bottom-[5px] right-[5px] absolute rounded-full bg-red-500 transition-all duration-250 delay-100 ease-in scale-100 ${
+          className={`w-[5px] h-[5px] bottom-[2px] right-[2px] absolute rounded-full bg-red-500 transition-all duration-250 delay-100 ease-in scale-100 ${
             isInvalid ? "scale3d-100" : "scale3d-0"
-          }`}
+          } lg:w-[10px] lg:h-[10px] lg:bottom-[5px] lg:right-[5px]`}
         />
       </div>
     </td>

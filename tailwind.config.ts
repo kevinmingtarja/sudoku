@@ -6,15 +6,7 @@ const config: Config = {
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
-  theme: {
-    extend: {
-      spacing: {
-        "100vw": "100vw",
-        "50vw": "50vw",
-        "25vw": "25vw",
-      },
-    },
-  },
+  theme: {},
   plugins: [require("tailwindcss-3d")],
 }
 export default config
